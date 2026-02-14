@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASK AI Skills Builder</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <span class="logo">&#9670;</span>
+                <h1>ASK AI Skills Builder</h1>
+                <span class="version">v0.2.0</span>
+            </div>
+            <div class="header-right">
+                <span class="connection-status" id="connectionStatus">
+                    <span class="status-dot disconnected"></span>
+                    <span class="status-text">Disconnected</span>
+                </span>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Agent Status Panel (Left Sidebar) -->
+            <aside class="status-panel" id="statusPanel">
+                <div class="panel-header">
+                    <h2>Agent Status</h2>
+                </div>
+
+                <!-- State Machine Visualization -->
+                <div class="state-machine">
+                    <div class="state-item" data-state="ready" id="state-ready">
+                        <span class="state-indicator"></span>
+                        <span class="state-label">Ready</span>
+                    </div>
+                    <div class="state-item" data-state="searching" id="state-searching">
+                        <span class="state-indicator"></span>
+                        <span class="state-label">Searching Web</span>
+                    </div>
+                    <div class="state-item" data-state="results_found" id="state-results">
+                        <span class="state-indicator"></span>
+                        <span class="state-label">Results Found</span>
+                    </div>
+                    <div class="state-item" data-state="checking_docs" id="state-docs">
+                        <span class="state-indicator"></span>
+                        <span class="state-label">Checking Docs</span>
+                    </div>
+                    <div class="state-item" data-state="checking_ask_ai" id="state-ask-ai">
+                        <span class="state-indicator"></span>
+                        <span class="state-label">Finding ASK AI</span>
+                    </div>
+                    <div class="state-item" data-state="interacting" id="state-interacting">
+                        <span class="state-indicator"></span>
+                        <span class="state-label">Interacting</span>
+                    </div>
+                    <div class="state-item" data-state="complete" id="state-complete">
+                        <span class="state-indicator"></span>
+                        <span class="state-label">Complete</span>
+                    </div>
+                </div>
+
+                <!-- Activity Log -->
+                <div class="activity-log-header">
+                    <h3>Activity Log</h3>
+                </div>
+                <div class="activity-log" id="activityLog">
+                    <div class="log-entry info">
+                        <span class="log-time">--:--:--</span>
+                        <span class="log-msg">Waiting for connection...</span>
+                    </div>
+                </div>
+
+                <!-- Technical Info -->
+                <div class="tech-info">
+                    <h3>Technical Details</h3>
+                    <div class="tech-item">
+                        <span class="tech-label">Search Engine</span>
+                        <span class="tech-value">Google ADK / DuckDuckGo</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-label">OCR Engine</span>
+                        <span class="tech-value">Tesseract 4.1</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-label">Browser</span>
+                        <span class="tech-value">Playwright Chromium</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-label">Port</span>
+                        <span class="tech-value">8074</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Chat Panel (Main Area) -->
+            <main class="chat-panel">
+                <div class="messages-container" id="messagesContainer">
+                    <div class="welcome-hint">
+                        <p>Agent is connecting...</p>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="input-area">
+                    <div class="input-wrapper">
+                        <input
+                            type="text"
+                            id="messageInput"
+                            placeholder="Type your message..."
+                            autocomplete="off"
+                            disabled
+                        >
+                        <button
+                            class="voice-btn"
+                            id="voiceBtn"
+                            title="Click to speak (Web Speech API)"
+                            disabled
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                                <line x1="12" y1="19" x2="12" y2="23"/>
+                                <line x1="8" y1="23" x2="16" y2="23"/>
+                            </svg>
+                        </button>
+                        <button class="send-btn" id="sendBtn" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="input-hint">
+                        Press Enter to send | Click microphone for voice input |
+                        <span id="voiceStatus">Voice: checking...</span>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
