@@ -25,10 +25,16 @@ class DocAnalyzer:
         "getting started", "quickstart", "tutorial", "developer",
         "guide", "sdk", "reference", "endpoints", "authentication",
         "installation", "setup", "configuration", "examples",
+        "github", "npm", "onchain", "smart contracts", "build app",
+    ]
+
+    # Common documentation platform indicators
+    DOC_PLATFORMS = [
+        "docusaurus", "mintlify", "gitbook", "readme.io", "nextra", "starlight",
     ]
 
     # Keywords for finding ASK AI buttons
-    ASK_AI_KEYWORDS = ["ask ai", "ask", "ai assistant", "chat with ai"]
+    ASK_AI_KEYWORDS = ["ask ai", "ask", "ai assistant", "chat with ai", "assistant"]
 
     async def check_dev_docs(self, url: str) -> bool:
         """Check if a URL hosts developer documentation."""
@@ -38,27 +44,47 @@ class DocAnalyzer:
             async with async_playwright() as p:
                 browser = await p.chromium.launch(headless=True)
                 context = await browser.new_context(
-                    viewport={"width": 1280, "height": 900}
+                    viewport={"width": 1280, "height": 900},
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 )
                 page = await context.new_page()
 
-                await page.goto(url, wait_until="domcontentloaded", timeout=15000)
-                await asyncio.sleep(2)
+                # Increase timeout and use better wait condition for modern docs
+                print(f"[DocAnalyzer] Navigating to {url}...")
+                await page.goto(url, wait_until="networkidle", timeout=30000)
+                await asyncio.sleep(3) # Extra buffer for final rendering
 
-                # Check page content and title for documentation indicators
-                content = await page.content()
+                # Check page title, content and meta tags
                 title = await page.title()
-                content_lower = (content + " " + title).lower()
+                content = await page.content()
+                
+                # Look for technical meta tags or headers
+                meta_description = await page.locator('meta[name="description"]').get_attribute("content") or ""
+                
+                content_lower = (content + " " + title + " " + meta_description).lower()
 
+                # Score based on indicators
                 score = sum(1 for ind in self.DOC_INDICATORS if ind in content_lower)
+                
+                # Boost score for platforms and structural hints
+                if any(plat in content_lower for plat in self.DOC_PLATFORMS):
+                    score += 5
+                
+                # Check for code blocks (highly indicative of dev docs)
+                has_code = await page.locator('pre, code, .code-block').count()
+                if has_code > 0:
+                    score += 3
 
                 # Also check URL patterns
                 url_lower = url.lower()
-                if any(p in url_lower for p in ["/docs", "/api", "/reference", "/guide"]):
-                    score += 2
+                if any(p in url_lower for p in ["/docs", "/api", "/reference", "/guide", "get-started"]):
+                    score += 5
 
+                print(f"[DocAnalyzer] Site analysis score for {url}: {score}")
                 await browser.close()
-                return score >= 2
+                
+                # Lower the threshold slightly but make the scoring more robust
+                return score >= 3
 
         except Exception as e:
             print(f"[DocAnalyzer] Error checking docs at {url}: {e}")
@@ -109,13 +135,36 @@ class DocAnalyzer:
                             "label": combined,
                         }
 
+                # Fallback: check for theme toggle before finishing (as per original doc requirement)
+                # The user mentioned switching to "Daytime" mode. We scan for light/sun icons or theme buttons.
+                theme_selectors = [
+                    'button[aria-label*="theme"]',
+                    'button[title*="theme"]',
+                    '.theme-toggle',
+                    '#theme-toggle',
+                    '.light-mode-toggle',
+                    '[data-theme-toggle]',
+                ]
+                for selector in theme_selectors:
+                    try:
+                        el = await page.query_selector(selector)
+                        if el and await el.is_visible():
+                            # We don't click automatically here, but we found it.
+                            # The interaction happens in the final step.
+                            pass
+                    except Exception:
+                        continue
+
                 # Fallback: check for AI-related buttons via DOM
                 ai_selectors = [
                     'button:has-text("Ask AI")',
                     'button:has-text("Ask")',
+                    'button:has-text("Assistant")',
                     '[data-testid*="ask"]',
                     '[aria-label*="Ask AI"]',
                     '.ask-ai-button',
+                    '#ask-ai-button',
+                    '[data-component="Assistant"]',
                 ]
                 for selector in ai_selectors:
                     try:

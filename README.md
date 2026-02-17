@@ -34,25 +34,38 @@ The AI Skills Builder provides a **web-based conversational interface** where us
   - Windows: [Tesseract at UB Mannheim](https://github.com/UB-Mannheim/tesseract/wiki)
 
 ### Installation
-```bash
-# Install dependencies
-pip install -r requirements.txt
+1. Create and activate a virtual environment:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Linux/macOS
+   # .venv\Scripts\activate   # On Windows
+   ```
 
-# Install Playwright browsers
-playwright install chromium
-```
+2. Install dependencies:
+   ```bash
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
+
+3. Install Playwright browsers:
+   ```bash
+   playwright install chromium
+   ```
 
 ## Usage
 
 ### Web Interface (Recommended)
+From the `ASK_AI` directory:
 ```bash
-# Start the web server on port 8074
+# Ensure the app is in your python path if running modules directly
+export PYTHONPATH=$PYTHONPATH:$(pwd)
 python -m app.main
-
-# Or use uvicorn directly
+```
+Or use **uvicorn** directly:
+```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8074
 ```
-Then open http://localhost:8074 in your browser.
+Then open [http://localhost:8074](http://localhost:8074) in your browser.
 
 ### Demo Script
 ```bash
